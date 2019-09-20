@@ -55,3 +55,10 @@ instance Alternative p => MonadPlus (ContT p k k) where
 
 instance MonadFail m => MonadFail (ContT m k k) where
     fail = ContT . pure . fail 
+
+liftLocal
+ :: (Monad m, Applicative p)
+ => m r -> (p r -> m i -> m j) -> p r -> ContT m i j a -> ContT m j i a
+liftLocal ask local f (ContT xm) = ContT $ \ k -> do
+    g <- pure <$> ask
+    local f (xm (local g . k))
