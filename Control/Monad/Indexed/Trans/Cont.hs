@@ -16,7 +16,7 @@ lift am = ContT (am >>=)
 evalContT :: Applicative p => ContT p a a a -> p a
 evalContT = flip runContT pure
 
-mapContT :: (f i -> f i) -> ContT f i j a -> ContT f i j a
+mapContT :: (f i -> f j) -> ContT f i k a -> ContT f j k a
 mapContT φ (ContT f) = ContT (φ . f)
 
 withContT :: ((b -> f j) -> (a -> f k)) -> ContT f i k a -> ContT f i j b
