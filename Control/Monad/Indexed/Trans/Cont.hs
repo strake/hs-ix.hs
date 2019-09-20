@@ -11,7 +11,7 @@ newtype ContT f i j a = ContT { runContT :: (a -> f j) -> f i }
   deriving (Functor)
 
 lift :: Monad m => m a -> ContT m i i a
-lift am = ContT (am >>=)
+lift = ContT . (>>=)
 
 evalContT :: Applicative p => ContT p a a a -> p a
 evalContT = flip runContT pure
