@@ -31,15 +31,14 @@ resetT (ContT f) = ContT (f pure >>=)
 shiftT :: Monad m => ((a -> m j) -> ContT m i k k) -> ContT m i j a
 shiftT f = ContT (flip runContT pure . f)
 
-instance IxApplicative (ContT f) where
-    ipure = ContT . flip id
+instance IxApply (ContT f) where
     iap = iapIxMonad
 
-instance IxMonad (ContT f) where
+instance IxBind (ContT f) where
     ijoin (ContT f) = ContT $ f . flip runContT
 
 instance Applicative (ContT f k k) where
-    pure = ipure
+    pure = ContT . flip id
     (<*>) = iap
 
 instance Alternative p => Alternative (ContT p k k) where

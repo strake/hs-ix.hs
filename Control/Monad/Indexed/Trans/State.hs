@@ -26,15 +26,14 @@ get = modifyF pure
 put :: Applicative p => j -> StateT p i j ()
 put = StateT . pure . pure . (,) ()
 
-instance Monad m => IxApplicative (StateT m) where
-    ipure a = StateT $ pure . (,) a
+instance Monad m => IxApply (StateT m) where
     StateT fm `iap` StateT xm = StateT $ \ i -> [(f x, k) | (f, j) <- fm i, (x, k) <- xm j]
 
-instance Monad m => IxMonad (StateT m) where
+instance Monad m => IxBind (StateT m) where
     ijoin = StateT . (>=> uncurry runStateT) . runStateT
 
 instance Monad m => Applicative (StateT m k k) where
-    pure = ipure
+    pure a = StateT $ pure . (,) a
     (<*>) = iap
 
 instance Monad m => Monad (StateT m k k) where

@@ -29,17 +29,16 @@ censor :: Functor f => (κ i j -> κ' i' j') -> WriterT κ f i j a -> WriterT κ
 censor = mapWriterT . fmap . fmap
 
 instance (Applicative p, Category κ) => Applicative (WriterT κ p k k) where
-    pure = ipure
+    pure = lift . pure
     (<*>) = iap
 
 instance (Monad m, Category κ) => Monad (WriterT κ m k k) where
     (>>=) = flip ibind
 
-instance (Category κ, Applicative p) => IxApplicative (WriterT κ p) where
-    ipure = lift . pure
+instance (Category κ, Applicative p) => IxApply (WriterT κ p) where
     WriterT x `iap` WriterT y = WriterT $ (\ (f, u) (a, v) -> (f a, v . u)) <$> x <*> y
 
-instance (Category κ, Monad m) => IxMonad (WriterT κ m) where
+instance (Category κ, Monad m) => IxBind (WriterT κ m) where
     ijoin (WriterT x) = WriterT [(b, v . u) | (WriterT y, u) <- x, (b, v) <- y]
 
 instance (Alternative p, Category κ) => Alternative (WriterT κ p k k) where
