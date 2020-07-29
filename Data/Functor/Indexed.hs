@@ -1,5 +1,6 @@
 {-# LANGUAGE RebindableSyntax #-}
 {-# LANGUAGE QuantifiedConstraints #-}
+{-# LANGUAGE DerivingVia #-}
 
 module Data.Functor.Indexed where
 
@@ -8,12 +9,13 @@ import Control.Category
 import Control.Monad
 import Control.Comonad
 import Data.Function (flip)
+import Data.Kind (Type)
 
-class (∀ i j . Functor (p i j)) => IxApplicative p where
+class (∀ i j . Functor (p i j), ∀ k . Applicative (p k k)) => IxApplicative p where
     ipure :: a -> p k k a
     iap :: p i j (a -> b) -> p j k a -> p i k b
 
-class IxApplicative m => IxMonad m where
+class (IxApplicative m, ∀ k . Monad (m k k)) => IxMonad m where
     ijoin :: m i j (m j k a) -> m i k a
     ijoin = ibind id
 
@@ -34,6 +36,9 @@ class (∀ i j . Functor (ɯ i j)) => IxComonad ɯ where
 
 newtype IxWrap f i j a = IxWrap { unIxWrap :: f a }
   deriving (Functor)
+
+deriving via (p :: Type -> Type) instance Applicative p => Applicative (IxWrap p i j)
+deriving via (m :: Type -> Type) instance Monad m => Monad (IxWrap m i j)
 
 instance Applicative p => IxApplicative (IxWrap p) where
     ipure = IxWrap . pure
