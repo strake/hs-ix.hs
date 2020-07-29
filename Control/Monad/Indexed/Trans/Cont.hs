@@ -1,19 +1,20 @@
 module Control.Monad.Indexed.Trans.Cont where
 
-import Prelude (Functor (..), flip, ($))
-import Control.Applicative
+import Prelude (Functor (..), flip, ($), (<$>))
+import Control.Applicative (Alternative (..))
+import qualified Control.Applicative as Base
 import Control.Category
-import Control.Monad (Monad ((>>=)), MonadPlus (..))
-import Control.Monad.Fail (MonadFail (..))
+import qualified Control.Monad as Base
+import qualified Control.Monad.Fail as Base
 import Data.Functor.Indexed
 
 newtype ContT f i j a = ContT { runContT :: (a -> f j) -> f i }
   deriving (Functor)
 
-lift :: Monad m => m a -> ContT m i i a
-lift = ContT . (>>=)
+lift :: Base.Monad m => m a -> ContT m i i a
+lift = ContT . (Base.>>=)
 
-evalContT :: Applicative p => ContT p a a a -> p a
+evalContT :: Base.Applicative p => ContT p a a a -> p a
 evalContT = flip runContT pure
 
 mapContT :: (f i -> f j) -> ContT f i k a -> ContT f j k a
@@ -25,38 +26,38 @@ withContT φ (ContT f) = ContT (f . φ)
 callCC :: ((a -> ContT f j k b) -> ContT f i j a) -> ContT f i j a
 callCC f = ContT $ \ k -> runContT (f $ ContT . pure . k) k
 
-resetT :: Monad m => ContT m a i i -> ContT m j j a
-resetT (ContT f) = ContT (f pure >>=)
+resetT :: Base.Monad m => ContT m a i i -> ContT m j j a
+resetT (ContT f) = ContT (f pure Base.>>=)
 
-shiftT :: Monad m => ((a -> m j) -> ContT m i k k) -> ContT m i j a
+shiftT :: Base.Monad m => ((a -> m j) -> ContT m i k k) -> ContT m i j a
 shiftT f = ContT (flip runContT pure . f)
 
-instance IxApply (ContT f) where
-    iap = iapIxMonad
+instance Apply (ContT f) where
+    (<*>) = apIxMonad
 
-instance IxBind (ContT f) where
-    ijoin (ContT f) = ContT $ f . flip runContT
+instance Bind (ContT f) where
+    join (ContT f) = ContT $ f . flip runContT
 
-instance Applicative (ContT f k k) where
+instance Base.Applicative (ContT f k k) where
     pure = ContT . flip id
-    (<*>) = iap
+    (<*>) = (<*>)
 
 instance Alternative p => Alternative (ContT p k k) where
     empty = ContT $ pure empty
-    ContT f <|> ContT g = ContT $ liftA2 (<|>) f g
+    ContT f <|> ContT g = ContT $ Base.liftA2 (<|>) f g
 
-instance Monad (ContT f k k) where
-    (>>=) = flip ibind
+instance Base.Monad (ContT f k k) where
+    (>>=) = (>>=)
 
-instance Alternative p => MonadPlus (ContT p k k) where
+instance Alternative p => Base.MonadPlus (ContT p k k) where
     mzero = empty
     mplus = (<|>)
 
-instance MonadFail m => MonadFail (ContT m k k) where
-    fail = ContT . pure . fail 
+instance Base.MonadFail m => Base.MonadFail (ContT m k k) where
+    fail = ContT . pure . Base.fail
 
 liftLocal
- :: (Monad m, Applicative p)
+ :: (Base.Monad m, Base.Applicative p)
  => m r -> (p r -> m i -> m j) -> p r -> ContT m i j a -> ContT m j i a
 liftLocal ask local f (ContT xm) = ContT $ \ k -> do
     g <- pure <$> ask

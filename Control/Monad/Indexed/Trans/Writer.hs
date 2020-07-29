@@ -1,11 +1,12 @@
 module Control.Monad.Indexed.Trans.Writer where
 
-import Prelude hiding ((.), id)
-import Control.Applicative
+import Prelude hiding ((.), id, (<*>), Monad (..))
+import Control.Applicative (Alternative (..))
+import qualified Control.Applicative as Base
 import Control.Category (Category (id))
 import Control.Semigroupoid (Semigroupoid (..))
-import Control.Monad ((>=>), MonadPlus (..))
-import Control.Monad.Fix (MonadFix (..))
+import qualified Control.Monad as Base
+import qualified Control.Monad.Fix as Base
 import Data.Functor.Indexed
 
 newtype WriterT κ f i j a = WriterT { runWriterT :: f (a, κ i j) }
@@ -29,27 +30,27 @@ pass = mapWriterT . fmap $ \ ((a, f), v) -> (a, f v)
 censor :: Functor f => (κ i j -> κ' i' j') -> WriterT κ f i j a -> WriterT κ' f i' j' a
 censor = mapWriterT . fmap . fmap
 
-instance (Applicative p, Category κ) => Applicative (WriterT κ p k k) where
+instance (Base.Applicative p, Category κ) => Base.Applicative (WriterT κ p k k) where
     pure = lift . pure
-    (<*>) = iap
+    (<*>) = (<*>)
 
-instance (Monad m, Category κ) => Monad (WriterT κ m k k) where
-    (>>=) = flip ibind
+instance (Base.Monad m, Category κ) => Base.Monad (WriterT κ m k k) where
+    (>>=) = (>>=)
 
-instance (Semigroupoid κ, Applicative p) => IxApply (WriterT κ p) where
-    WriterT x `iap` WriterT y = WriterT $ (\ (f, u) (a, v) -> (f a, v . u)) <$> x <*> y
+instance (Semigroupoid κ, Base.Applicative p) => Apply (WriterT κ p) where
+    WriterT x <*> WriterT y = WriterT $ (\ (f, u) (a, v) -> (f a, v . u)) <$> x Base.<*> y
 
-instance (Semigroupoid κ, Monad m) => IxBind (WriterT κ m) where
-    ijoin (WriterT x) = WriterT [(b, v . u) | (WriterT y, u) <- x, (b, v) <- y]
+instance (Semigroupoid κ, Base.Monad m) => Bind (WriterT κ m) where
+    join (WriterT x) = WriterT [(b, v . u) | (WriterT y, u) <- x, (b, v) <- y]
 
 instance (Alternative p, Category κ) => Alternative (WriterT κ p k k) where
     empty = WriterT empty
     WriterT x <|> WriterT y = WriterT (x <|> y)
 
-instance (MonadPlus p, Category κ) => MonadPlus (WriterT κ p k k)
+instance (Base.MonadPlus p, Category κ) => Base.MonadPlus (WriterT κ p k k)
 
-instance (MonadFix m, Category κ) => MonadFix (WriterT κ m k k) where
-    mfix f = WriterT $ mfix (\ (a, u) -> (\ (b, v) -> (b, v . u)) <$> runWriterT (f a))
+instance (Base.MonadFix m, Category κ) => Base.MonadFix (WriterT κ m k k) where
+    mfix f = WriterT $ Base.mfix (\ (a, u) -> (\ (b, v) -> (b, v . u)) <$> runWriterT (f a))
 
 liftCallCC
  :: Category κ
