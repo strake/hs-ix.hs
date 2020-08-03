@@ -17,6 +17,7 @@ library
   exposed-modules:     Data.Functor.Indexed
                      , Control.Monad.Indexed.Trans.Cont
                      , Control.Monad.Indexed.Trans.State
+                     , Control.Monad.Indexed.Trans.Writer
   build-depends:       base >= 4.7 && < 5
                      , base-unicode-symbols
                      , hs-functors
