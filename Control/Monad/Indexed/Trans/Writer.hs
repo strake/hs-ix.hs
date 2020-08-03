@@ -2,7 +2,8 @@ module Control.Monad.Indexed.Trans.Writer where
 
 import Prelude hiding ((.), id)
 import Control.Applicative
-import Control.Category
+import Control.Category (Category (id))
+import Control.Semigroupoid (Semigroupoid (..))
 import Control.Monad ((>=>), MonadPlus (..))
 import Control.Monad.Fix (MonadFix (..))
 import Data.Functor.Indexed
@@ -35,10 +36,10 @@ instance (Applicative p, Category κ) => Applicative (WriterT κ p k k) where
 instance (Monad m, Category κ) => Monad (WriterT κ m k k) where
     (>>=) = flip ibind
 
-instance (Category κ, Applicative p) => IxApply (WriterT κ p) where
+instance (Semigroupoid κ, Applicative p) => IxApply (WriterT κ p) where
     WriterT x `iap` WriterT y = WriterT $ (\ (f, u) (a, v) -> (f a, v . u)) <$> x <*> y
 
-instance (Category κ, Monad m) => IxBind (WriterT κ m) where
+instance (Semigroupoid κ, Monad m) => IxBind (WriterT κ m) where
     ijoin (WriterT x) = WriterT [(b, v . u) | (WriterT y, u) <- x, (b, v) <- y]
 
 instance (Alternative p, Category κ) => Alternative (WriterT κ p k k) where

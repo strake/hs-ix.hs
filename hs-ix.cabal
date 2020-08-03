@@ -19,7 +19,7 @@ library
                      , Control.Monad.Indexed.Trans.State
                      , Control.Monad.Indexed.Trans.Writer
   build-depends:       base >= 4.7 && < 5
-                     , hs-functors >= 0.1.6 && < 0.2
+                     , hs-functors >= 0.1.7 && < 0.2
   default-language:    Haskell2010
   default-extensions:  UnicodeSyntax
                      , LambdaCase
