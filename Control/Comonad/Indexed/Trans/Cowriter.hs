@@ -13,6 +13,10 @@ import Data.Functor.Indexed
 newtype CowriterT κ f i j a = CowriterT { runCowriterT :: f (κ i j -> a) }
   deriving (Functor)
 
+instance Base.Applicative p => Base.Applicative (CowriterT κ p i j) where
+    pure = CowriterT . pure . pure
+    CowriterT x <*> CowriterT y = CowriterT (Base.liftA2 (Base.<*>) x y)
+
 instance (Base.Comonad ɯ, Category κ) => Base.Comonad (CowriterT κ ɯ k k) where
     copure = cotell id
     cut = cut
