@@ -17,6 +17,7 @@ library
   exposed-modules:     Data.Functor.Indexed
                      , Control.Comonad.Indexed.Trans.Costate
                      , Control.Comonad.Indexed.Trans.Cowriter
+                     , Control.Monad.Indexed.Signatures
                      , Control.Monad.Indexed.Trans.Cont
                      , Control.Monad.Indexed.Trans.State
                      , Control.Monad.Indexed.Trans.Writer

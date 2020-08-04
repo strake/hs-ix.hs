@@ -7,6 +7,7 @@ import Control.Category (Category (id))
 import Control.Semigroupoid (Semigroupoid (..))
 import qualified Control.Monad as Base
 import qualified Control.Monad.Fix as Base
+import Control.Monad.Indexed.Signatures
 import Data.Functor.Indexed
 
 newtype WriterT κ f i j a = WriterT { runWriterT :: f (a, κ i j) }
@@ -57,11 +58,7 @@ liftCallCC
  => CallCC f g h (a, κ k k) (b, κ i₁ j₁) (c, κ i₂ j₂) (d, κ i₃ j₃) -> CallCC (WriterT κ f i₁ j₁) (WriterT κ g i₂ j₂) (WriterT κ h i₃ j₃) a b c d
 liftCallCC callCC f = WriterT $ callCC $ \ k -> runWriterT $ f $ \ a -> WriterT $ k (a, id)
 
-type CallCC f g h a b c d = ((a -> f b) -> g c) -> h d
-
 liftCatch
  :: Catch e f g h (a, κ i₁ j₁) (b, κ i₂ j₂) (c, κ i₃ j₃)
  -> Catch e (WriterT κ f i₁ j₁) (WriterT κ g i₂ j₂) (WriterT κ h i₃ j₃) a b c
 liftCatch catchE (WriterT xm) h = WriterT $ catchE xm $ runWriterT . h
-
-type Catch e f g h a b c = f a -> (e -> g b) -> h c

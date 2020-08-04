@@ -5,6 +5,7 @@ import Control.Applicative (Alternative (..))
 import qualified Control.Applicative as Base
 import qualified Control.Monad as Base
 import qualified Control.Monad.Fix as Base
+import Control.Monad.Indexed.Signatures
 import Data.Functor.Indexed
 
 newtype StateT f i j a = StateT { runStateT :: i -> f (a, j) }
@@ -60,14 +61,10 @@ liftCallCC callCC f =
     callCC $ \ k ->
     runStateT (f $ \ a -> StateT $ \ _ -> k (a, st)) st
 
-type CallCC f g h a b c d = ((a -> f b) -> g c) -> h d
-
 liftCatch
  :: Catch e f g h (a, i) (b, j) (c, k)
  -> Catch e (StateT f l i) (StateT g l j) (StateT h l k) a b c
 liftCatch catchE (StateT xm) h = StateT $ \ st -> xm st `catchE` \ e -> runStateT (h e) st
-
-type Catch e f g h a b c = f a -> (e -> g b) -> h c
 
 liftListen
  :: Functor f
@@ -76,13 +73,9 @@ liftListen
 liftListen listen xm = StateT $ \ st ->
     flip fmap (listen (xm st)) $ \ ~((a, st'), w) -> ((a, w), st')
 
-type Listen w f a b = b -> f (a, w)
-
 liftPass
  :: Functor f
  => Pass z f g (a, k) (b, j)
  -> Pass z (StateT f i k) (StateT g i j) a b
 liftPass pass (StateT xm) = StateT $ \ st ->
     pass $ flip fmap (xm st) $ \ ~((a, f), st') -> ((a, st'), f)
-
-type Pass z f g a b = f (a, z) -> g b
