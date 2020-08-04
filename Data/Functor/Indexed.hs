@@ -33,7 +33,7 @@ class (∀ i j . Functor (p i j)) => Apply p where
 (<**>) = liftA2 (flip id)
 
 infixl 1 >>=
-class (∀ i j . Functor (m i j)) => Bind m where
+class Apply m => Bind m where
     {-# MINIMAL join | (>>=) #-}
 
     join :: m i j (m j k a) -> m i k a
