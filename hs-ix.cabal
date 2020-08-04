@@ -1,7 +1,7 @@
 name:                hs-ix
 version:             0.1.1.0
-synopsis:            Indexed monads
--- description:
+synopsis:            Indexed applicative functors and monads
+description:         Indexed applicative functors and monads: see "Data.Functor.Indexed" to begin.
 license:             BSD3
 license-file:        LICENSE
 author:              M Farkas-Dyck

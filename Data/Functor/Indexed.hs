@@ -2,6 +2,8 @@
 {-# LANGUAGE QuantifiedConstraints #-}
 {-# LANGUAGE DerivingVia #-}
 
+-- | Indexed applicative functors and monads: see 'Apply', 'Bind', 'Cobind'.
+
 module Data.Functor.Indexed (module Data.Functor.Indexed, pure, copure) where
 
 import Prelude (Functor (fmap), pure, (<$>), Foldable, Traversable, Eq, Ord)
@@ -14,6 +16,18 @@ import Data.Function (flip)
 import Data.Kind (Type)
 
 infixl 4 <*>, *>, <*, <**>
+-- | Functors into which binary (and thus @n@-ary) functions can be lifted
+--
+-- Laws:
+--
+-- * @('.') '<$>' u '<*>' v '<*>' w = u '<*>' (v '<*>' w)@
+--
+-- Relations of methods:
+--
+-- * @'liftA2' f x y = f '<$>' x '<*>' y@
+-- * @('<*>') = 'liftA2' 'id'@
+-- * @('*>') = 'liftA2' ('pure' 'id')@
+-- * @('<*') = 'liftA2' ('id' 'pure')@
 class (∀ i j . Functor (p i j)) => Apply p where
     {-# MINIMAL (<*>) | liftA2 #-}
 
@@ -33,6 +47,20 @@ class (∀ i j . Functor (p i j)) => Apply p where
 (<**>) = liftA2 (flip id)
 
 infixl 1 >>=
+-- | Functors of which nested levels can be combined
+--
+-- Laws in terms of 'join':
+--
+-- * @'join' '.' 'fmap' 'join' = 'join' '.' 'join'@
+--
+-- Laws in terms of '>>=':
+--
+-- * @('>>=' f) '.' ('>>=' g) = ('>>=' ('>>=' f) '.' g)@
+--
+-- Relation of 'join' and '>>=':
+--
+-- * @'join' = ('>>=' 'id')@
+-- * @('>>=' f) = 'join' '.' 'fmap' 'f'@
 class Apply m => Bind m where
     {-# MINIMAL join | (>>=) #-}
 
@@ -47,6 +75,20 @@ apIxMonad fm xm = [f x | f <- fm, x <- xm] where
     return = Base.pure
 
 infixr 1 <<=
+-- | Dual of 'Bind'
+--
+-- Laws in terms of 'cut':
+--
+-- * @'cut' '.' 'cut' = 'fmap' 'cut' '.' 'cut'@
+--
+-- Laws in terms of '<<=':
+--
+-- * @(f '<<=') '.' (g '<<=') = (f '.' (g '<<=') '<<=')@
+--
+-- Relation of 'cut' and '<<=':
+--
+-- * @'cut' = ('id' '<<=')@
+-- * @(f '<<=') = 'fmap' f . 'cut'@
 class (∀ i j . Functor (ɯ i j)) => Cobind ɯ where
     {-# MINIMAL cut | (<<=) #-}
 

@@ -1,3 +1,5 @@
+-- | The indexed writer transformer: each @'WriterT' κ f@ term bears a morphism of @κ@ atop its argument, which are composed as the 'WriterT' terms are 'join'ed and @('<*>')@d.
+
 module Control.Monad.Indexed.Trans.Writer where
 
 import Prelude hiding ((.), id, (<*>), Monad (..))

@@ -1,3 +1,5 @@
+-- | The indexed cowriter transformer: each @'CowriterT' κ f@ term wants within @f@ a morphism of @κ@.
+
 module Control.Comonad.Indexed.Trans.Cowriter where
 
 import Prelude hiding ((.), id)

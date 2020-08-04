@@ -1,3 +1,5 @@
+-- | The indexed costate (also called "store") transfomer: each @'CostateT' f i j@ term has a value of type @i@, and wants within @f@ a value of type @j@.
+
 module Control.Comonad.Indexed.Trans.Costate where
 
 import Prelude hiding ((.))

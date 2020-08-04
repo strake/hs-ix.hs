@@ -1,3 +1,5 @@
+-- | The indexed state transformer: each @'StateT' _ i j@ term takes an input of type @i@ and gives an output of type @j@.
+
 module Control.Monad.Indexed.Trans.State where
 
 import Prelude hiding ((<*>), Monad (..))

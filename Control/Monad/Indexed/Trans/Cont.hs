@@ -1,3 +1,5 @@
+-- | The indexed continuation transformer: see 'ContT'.
+
 module Control.Monad.Indexed.Trans.Cont where
 
 import Prelude (Functor (..), flip, ($), (<$>))
